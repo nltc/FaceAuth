@@ -16,9 +16,8 @@ logging.basicConfig(
 
 if __name__ == '__main__':
     db = PostgreSQL(URL)
-
-    # db.close_connection()
     app = QApplication(sys.argv)
     window = FaceAuthenticationForm()
     window.show()
+    db.close_connection()
     sys.exit(app.exec_())

@@ -11,9 +11,9 @@ from PyQt5.QtWidgets import (
 
 
 os.environ["QT_QPA_PLATFORM"] = "wayland"
-face_cascade = cv2.CascadeClassifier(
+FACE_CASCADE = cv2.CascadeClassifier(
     '/home/vmyakotin/PycharmProjects/pythonProject/cascades/haarcascade_frontalface_default.xml')
-eye_cascade = cv2.CascadeClassifier(
+EYE_CASCADE = cv2.CascadeClassifier(
     '/home/vmyakotin/PycharmProjects/pythonProject/cascades/haarcascade_eye.xml')
 
 
@@ -75,14 +75,22 @@ class FaceAuthenticationForm(QMainWindow):
         password = self.edit_password.text()
         db = PostgreSQL(URL)
         user_info = db.get_info(username)
+        login_and_pwd = (
+            True
+            if username == user_info.get('login', '') and password == user_info.get('password', '')
+            else False)
+        login_and_not_pwd = (
+            True
+            if username == user_info.get('login', '') and password != user_info.get('password', '')
+            else False)
 
-        if isinstance(user_info, dict) and username == user_info.get('login') and password == user_info.get('password'):
+        if login_and_pwd:
             self.centralWidget().deleteLater()
             self.video_player = VideoPlayer(user_info)
             self.hide()
             self.video_player.show()
 
-        elif isinstance(user_info, dict) and username == user_info.get('login') and password != user_info.get('password'):
+        elif login_and_not_pwd:
             QMessageBox.warning(self, "Ошибка", "Неправильный пароль")
 
         else:
@@ -102,30 +110,51 @@ class VideoPlayer(QMainWindow):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(5)
 
-        self.start_auth_button = QPushButton("Start Authentication", self)
-        self.start_auth_button.move(20, 420)
+        self.start_auth_button = QPushButton("Начать аутентификацию", self)
+        self.start_auth_button.setFixedWidth(200)
+        self.start_auth_button.move(150, 420)
         self.start_auth_button.clicked.connect(self.start_authentication)
 
-        self.back_button = QPushButton("Back", self)
-        self.back_button.move(150, 420)
+        self.back_button = QPushButton("Назад", self)
+        self.back_button.move(380, 420)
         self.back_button.clicked.connect(self.go_back)
 
         self.cap = cv2.VideoCapture(0)
+        self.setStyleSheet("""
+                    QLabel {
+                        font-size: 16px;
+                    }
+                    QLineEdit {
+                        font-size: 16px;
+                        padding: 6px;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                    }
+                    QPushButton {
+                        font-size: 16px;
+                        padding: 8px;
+                        background-color: #4CAF50;
+                        color: #fff;
+                        border: none;
+                        border-radius: 4px;
+                    }
+                    QMainWindow {
+                        background-color: #f0f0f0;
+                    }
+                """)
 
     def update_frame(self):
         ret, frame = self.cap.read()
 
         if ret:
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(frame_gray, scaleFactor=1.5, minNeighbors=5)
+            faces = FACE_CASCADE.detectMultiScale(frame_gray, scaleFactor=1.5, minNeighbors=5)
 
             for (x, y, w, h) in faces:
-
                 roi_gray = frame_gray[y:y + h, x:x + w]
                 roi_color = frame[y:y + h, x:x + w]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-                eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.5, minNeighbors=5)
+                eyes = EYE_CASCADE.detectMultiScale(roi_gray, scaleFactor=1.5, minNeighbors=5)
 
                 for (ex, ey, ew, eh) in eyes:
                     cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
@@ -144,7 +173,6 @@ class VideoPlayer(QMainWindow):
 
             if len(face_locations) > 0:
                 user_image = face_recognition.load_image_file(self.user_info.get('path'))
-
                 user_face_encodings = face_recognition.face_encodings(user_image)
 
                 if len(user_face_encodings) > 0:

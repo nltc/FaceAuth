@@ -6,12 +6,9 @@ LOG = logging.getLogger(__name__)
 
 
 class PostgreSQL:
-
     def __init__(self, url):
-
         try:
             self.connection = psycopg2.connect(url)
-
             self.connection.autocommit = True
 
             with self.connection.cursor() as cursor:
@@ -23,11 +20,7 @@ class PostgreSQL:
                     '\nConnection successful')
 
         except Exception as exc:
-            print('e', exc)
             LOG.error(exc)
-
-    def add_user(self):
-        pass
 
     def close_connection(self):
         if self.connection:
@@ -41,14 +34,15 @@ class PostgreSQL:
             'login': '',
             'password': '',
             'path': ''}
+
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(
                     f"SELECT * FROM users_data WHERE user_login = '{user_name}';")
 
                 return dict(zip(users_dict, cursor.fetchone()[1:]))
-        except Exception as e:
-            return 'Нет пользователя с таким именем'
+        except Exception:
+            return dict()
 
     def _new_table(self):
         with self.connection.cursor() as cursor:
@@ -84,11 +78,8 @@ class PostgreSQL:
 
 
 if __name__ == '__main__':
-
     db = PostgreSQL(URL)
     print(db.get_info('nlt'))
     # db._delete_table()
     # db._new_table()
-    # db._insert_info('Vladimir Myakotin', 'Admin', 'nlt', 'nltc', '/home/vmyakotin/PycharmProjects/pythonProject/main/user_faces/VladimirMyakotin.png')
-    # db._insert_info('Anna Ovsyanikova', 'User', 'annet', 'annets', '/home/vmyakotin/PycharmProjects/pythonProject/main/user_faces/Anya')
     db.close_connection()
