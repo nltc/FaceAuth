@@ -1,6 +1,6 @@
 import psycopg2
-from config import URL
 import logging
+from config import URL
 
 LOG = logging.getLogger(__name__)
 

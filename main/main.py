@@ -1,10 +1,10 @@
 import sys
+import logging
+import os
 from PyQt5.QtWidgets import QApplication
 from config import URL
 from postgresdb import PostgreSQL
 from desktop_interface import FaceAuthenticationForm
-import logging
-import os
 
 os.environ["QT_QPA_PLATFORM"] = "wayland"
 

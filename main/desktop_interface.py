@@ -9,7 +9,6 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox, QDesktopWidget)
 
-
 os.environ["QT_QPA_PLATFORM"] = "wayland"
 FACE_CASCADE = cv2.CascadeClassifier(
     '/home/vmyakotin/PycharmProjects/pythonProject/cascades/haarcascade_frontalface_default.xml')
@@ -19,7 +18,7 @@ EYE_CASCADE = cv2.CascadeClassifier(
 
 class FaceAuthenticationForm(QMainWindow):
     def __init__(self):
-        super(FaceAuthenticationForm, self).__init__()
+        super().__init__()
 
         self.setWindowTitle('Аутентификация')
         self.resize(600, 400)
