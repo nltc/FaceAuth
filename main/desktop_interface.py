@@ -5,8 +5,10 @@ import cv2
 from config import URL
 from postgresdb import PostgreSQL
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import QTimer, QEventLoop
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox, QDesktopWidget
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import (
+    QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox, QDesktopWidget)
+
 
 os.environ["QT_QPA_PLATFORM"] = "wayland"
 face_cascade = cv2.CascadeClassifier(
@@ -75,10 +77,8 @@ class FaceAuthenticationForm(QMainWindow):
         user_info = db.get_info(username)
 
         if isinstance(user_info, dict) and username == user_info.get('login') and password == user_info.get('password'):
-
             self.centralWidget().deleteLater()
             self.video_player = VideoPlayer(user_info)
-
             self.hide()
             self.video_player.show()
 
@@ -94,16 +94,14 @@ class VideoPlayer(QMainWindow):
         super().__init__()
         self.user_info = user_info
         self.setGeometry(200, 200, 600, 400)
-        # Создаем виджет для отображения изображения
+
         self.image_label = QLabel(self)
         self.setCentralWidget(self.image_label)
 
-        # Создаем таймер для обновления изображения
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(5)
 
-        # Создаем кнопки для авторизации
         self.start_auth_button = QPushButton("Start Authentication", self)
         self.start_auth_button.move(20, 420)
         self.start_auth_button.clicked.connect(self.start_authentication)
@@ -112,44 +110,32 @@ class VideoPlayer(QMainWindow):
         self.back_button.move(150, 420)
         self.back_button.clicked.connect(self.go_back)
 
-        # Открываем видеопоток с веб-камеры
         self.cap = cv2.VideoCapture(0)
 
     def update_frame(self):
-        # Захватываем кадр с веб-камеры
         ret, frame = self.cap.read()
 
         if ret:
-            # Преобразуем кадр в изображение с использованием OpenCV
-            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Преобразуем кадр в черно-белый формат
-
-            # Обнаруживаем лица на кадре
+            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = face_cascade.detectMultiScale(frame_gray, scaleFactor=1.5, minNeighbors=5)
 
-            # Рисуем прямоугольник вокруг лица
             for (x, y, w, h) in faces:
+
                 roi_gray = frame_gray[y:y + h, x:x + w]
                 roi_color = frame[y:y + h, x:x + w]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-                # Обнаруживаем глаза на кадре
                 eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.5, minNeighbors=5)
 
-                # Рисуем прямоугольник вокруг глаз
                 for (ex, ey, ew, eh) in eyes:
                     cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
 
-            # Отображаем изображение на экране
             height, width, channels = frame.shape
             qimage = QImage(frame, width, height, channels * width, QImage.Format_BGR888)
-
-            # Создаем QPixmap из QImage для отображения в QLabel
             pixmap = QPixmap.fromImage(qimage)
 
-            # Обновляем QLabel с новым изображением
             self.image_label.setPixmap(pixmap)
 
-    # Создаем слот для обработки нажатия кнопки "Начать авторизацию"
     def start_authentication(self):
         ret, frame = self.cap.read()
 
@@ -179,11 +165,8 @@ class VideoPlayer(QMainWindow):
             else:
                 QMessageBox.warning(self, "Ошибка", "Лица не обнаружены на кадре. Попробуйте еще раз")
 
-    # Создаем слот для обработки нажатия кнопки "Назад"
     def go_back(self):
-        # Закрываем окно авторизации и возвращаемся к основному окну
         self.login_window = FaceAuthenticationForm()
-        # Скрываем окно авторизации и отображаем окно с веб-камерой
         self.hide()
         self.login_window.show()
 
