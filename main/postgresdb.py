@@ -75,6 +75,8 @@ class PostgreSQL:
             return 'Нет такого пользователя'
 
     def _new_table(self):
+        """Создание новой таблицы (При релизе метод будет удален)"""
+
         with self.connection.cursor() as cursor:
             cursor.execute(
                 '''CREATE TABLE IF NOT EXISTS users_data(
@@ -90,6 +92,8 @@ class PostgreSQL:
             LOG.debug('Database created')
 
     def _delete_table(self):
+        """Удаление таблицы (При релизе метод будет удален)"""
+
         with self.connection.cursor() as cursor:
             cursor.execute(
                 '''DROP TABLE users_data;''')
@@ -97,6 +101,8 @@ class PostgreSQL:
             LOG.debug('Database deleted')
 
     def _insert_info(self, user_name, user_rights, user_login, user_passwd, work_time, path_to_photo):
+        """Добавление пользователя в базу данных (При релизе метод будет удален)"""
+
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f'''INSERT INTO users_data (
