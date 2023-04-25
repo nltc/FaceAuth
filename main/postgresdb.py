@@ -110,6 +110,7 @@ class PostgreSQL:
                 '{user_name}', '{user_rights}', '{user_login}',
                 '{user_passwd}','{work_time}', '{path_to_photo}')'''
             )
+
         LOG.debug('info inserted')
 
 

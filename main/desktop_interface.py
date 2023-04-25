@@ -17,12 +17,12 @@ EYE_CASCADE = cv2.CascadeClassifier(
 
 
 class FaceAuthenticationForm(QMainWindow):
-    """Класс авторизации по логину и паролю"""
+    """Окно авторизации по логину и паролю"""
 
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('Аутентификация')
+        self.setWindowTitle('Авторизация по лицу')
         self.resize(600, 400)
         screen_size = QDesktopWidget().screenGeometry()
         x = (screen_size.width() - self.width()) / 2
@@ -67,10 +67,11 @@ class FaceAuthenticationForm(QMainWindow):
             }
             QMainWindow {
                 background-color: #f0f0f0;
-            }
-        """)
+            }""")
 
     def login(self):
+        """Кнопка авторизации"""
+
         username = self.edit_username.text()
         password = self.edit_password.text()
         db = PostgreSQL(URL)
@@ -97,12 +98,14 @@ class FaceAuthenticationForm(QMainWindow):
 
 
 class VideoPlayer(QMainWindow):
-    """Класс авторизации по лицу"""
+    """Окно авторизации по лицу"""
 
     def __init__(self, user_info):
         super().__init__()
+
+        self.setWindowTitle('Авторизация по лицу')
         self.user_info = user_info
-        self.setGeometry(200, 200, 600, 400)
+        self.resize(600, 400)
 
         self.image_label = QLabel(self)
         self.setCentralWidget(self.image_label)
@@ -121,6 +124,7 @@ class VideoPlayer(QMainWindow):
         self.back_button.clicked.connect(self.go_back)
 
         self.cap = cv2.VideoCapture(0)
+
         self.setStyleSheet("""
                     QLabel {
                         font-size: 16px;
@@ -141,10 +145,11 @@ class VideoPlayer(QMainWindow):
                     }
                     QMainWindow {
                         background-color: #f0f0f0;
-                    }
-                """)
+                    }""")
 
     def update_frame(self):
+        """Рисование прямоугольников вокруг лица и глаз"""
+
         ret, frame = self.cap.read()
 
         if ret:
@@ -167,6 +172,8 @@ class VideoPlayer(QMainWindow):
             self.image_label.setPixmap(pixmap)
 
     def start_authentication(self):
+        """Кнопка авторизации по лицу"""
+
         ret, frame = self.cap.read()
 
         if ret:
@@ -206,6 +213,8 @@ class VideoPlayer(QMainWindow):
                 QMessageBox.warning(self, "Ошибка", "Лица не обнаружены на кадре. Попробуйте еще раз")
 
     def go_back(self):
+        """Возвращение в окно авторизации по логину и паролю"""
+
         self.login_window = FaceAuthenticationForm()
         self.cap.release()
         cv2.destroyAllWindows()
@@ -214,11 +223,11 @@ class VideoPlayer(QMainWindow):
 
 
 class TimeViewerUser(QMainWindow):
-    """Класс счетчика времени пользователя"""
+    """Окно счетчика времени пользователя"""
 
     def __init__(self, time):
         super().__init__()
-        self.setWindowTitle('Аутентификация')
+        self.setWindowTitle('Авторизация по лицу')
         self.resize(600, 400)
         screen_size = QDesktopWidget().screenGeometry()
         x = (screen_size.width() - self.width()) / 2
@@ -262,22 +271,21 @@ class TimeViewerUser(QMainWindow):
         """)
 
     def back_to_menu(self):
+        """Возвращение в окно авторизации по логину и паролю"""
+
         self.login_window = FaceAuthenticationForm()
         self.hide()
         self.login_window.show()
 
 
 class TimeViewerAdmin(QMainWindow):
-    """Класс счетчика времени админа"""
+    """Окно счетчика времени админа"""
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Аутентификация')
+        self.setWindowTitle('Авторизация по лицу')
         self.resize(600, 400)
-        screen_size = QDesktopWidget().screenGeometry()
-        x = (screen_size.width() - self.width()) / 2
-        y = (screen_size.height() - self.height()) / 2
-        self.move(int(x), int(y))
+
         self.name_text = QLabel('Введите имя пользователя, чтобы узнать, сколько он отработал')
         self.label_username = QLabel('Поле для ввода имени:')
         self.edit_username = QLineEdit()
@@ -292,6 +300,7 @@ class TimeViewerAdmin(QMainWindow):
         layout.addWidget(self.edit_username)
         layout.addWidget(self.select_button)
         layout.addWidget(self.back_button)
+
         self.widget = QWidget()
         self.widget.setLayout(layout)
         self.setCentralWidget(self.widget)
@@ -316,15 +325,18 @@ class TimeViewerAdmin(QMainWindow):
             }
             QMainWindow {
                 background-color: #f0f0f0;
-            }
-        """)
+            }""")
 
     def back_to_menu(self):
+        """Возвращение в окно авторизации по логину и паролю"""
+
         self.login_window = FaceAuthenticationForm()
         self.hide()
         self.login_window.show()
 
     def show_user_time(self):
+        """Показ информации о пользователях"""
+
         username = self.edit_username.text()
         db = PostgreSQL(URL)
         user_info = db.get_user_info(username)
