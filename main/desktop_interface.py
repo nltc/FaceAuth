@@ -181,12 +181,12 @@ class VideoPlayer(QMainWindow):
                     for face_encoding in face_encodings:
                         face_distance = face_recognition.face_distance([user_face_encoding], face_encoding)
 
-                        if face_distance[0] < 0.6 and self.user_info.get('rights') == 'User':
+                        if face_distance[0] < 0.6 and self.user_info.get('rights', '') == 'User':
                             self.time_viewer = TimeViewer()
                             self.hide()
                             self.time_viewer.show()
 
-                        elif face_distance[0] < 0.6 and self.user_info.get('rights') == 'Admin':
+                        elif face_distance[0] < 0.6 and self.user_info.get('rights', '') == 'Admin':
                             pass
 
                         else:
