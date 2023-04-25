@@ -24,10 +24,6 @@ class FaceAuthenticationForm(QMainWindow):
 
         self.setWindowTitle('Авторизация по лицу')
         self.resize(600, 400)
-        screen_size = QDesktopWidget().screenGeometry()
-        x = (screen_size.width() - self.width()) / 2
-        y = (screen_size.height() - self.height()) / 2
-        self.move(int(x), int(y))
 
         self.label_username = QLabel('Username')
         self.edit_username = QLineEdit()
@@ -104,9 +100,9 @@ class VideoPlayer(QMainWindow):
         super().__init__()
 
         self.setWindowTitle('Авторизация по лицу')
-        self.user_info = user_info
         self.resize(600, 400)
 
+        self.user_info = user_info
         self.image_label = QLabel(self)
         self.setCentralWidget(self.image_label)
 
@@ -227,12 +223,10 @@ class TimeViewerUser(QMainWindow):
 
     def __init__(self, time):
         super().__init__()
+
         self.setWindowTitle('Авторизация по лицу')
         self.resize(600, 400)
-        screen_size = QDesktopWidget().screenGeometry()
-        x = (screen_size.width() - self.width()) / 2
-        y = (screen_size.height() - self.height()) / 2
-        self.move(int(x), int(y))
+
         self.time = time
         self.label_username = QLabel(f'В этом месяце вы отработали {self.time} часов !')
         self.label_username.setAlignment(Qt.AlignCenter)
@@ -283,6 +277,7 @@ class TimeViewerAdmin(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
         self.setWindowTitle('Авторизация по лицу')
         self.resize(600, 400)
 
