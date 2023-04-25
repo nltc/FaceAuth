@@ -5,7 +5,7 @@ import cv2
 from config import URL
 from postgresdb import PostgreSQL
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox, QDesktopWidget)
 
@@ -84,7 +84,6 @@ class FaceAuthenticationForm(QMainWindow):
             else False)
 
         if login_and_pwd:
-            self.centralWidget().deleteLater()
             self.video_player = VideoPlayer(user_info)
             self.hide()
             self.video_player.show()
@@ -182,17 +181,78 @@ class VideoPlayer(QMainWindow):
                     for face_encoding in face_encodings:
                         face_distance = face_recognition.face_distance([user_face_encoding], face_encoding)
 
-                        if face_distance[0] < 0.6:
-                            QMessageBox.information(self, "Авторизация", "Вы успешно авторизовались")
-                            return
+                        if face_distance[0] < 0.6 and self.user_info.get('rights') == 'User':
+                            self.time_viewer = TimeViewer()
+                            self.hide()
+                            self.time_viewer.show()
 
-                    QMessageBox.warning(self, "Авторизация", "Ошибка авторизации. Попробуйте еще раз")
+                        elif face_distance[0] < 0.6 and self.user_info.get('rights') == 'Admin':
+                            pass
+
+                        else:
+                            QMessageBox.warning(self, "Авторизация", "Ошибка авторизации. Попробуйте еще раз")
                 else:
                     QMessageBox.warning(self, "Ошибка", "Лица не обнаружены на кадре. Попробуйте еще раз")
             else:
                 QMessageBox.warning(self, "Ошибка", "Лица не обнаружены на кадре. Попробуйте еще раз")
 
     def go_back(self):
+        self.login_window = FaceAuthenticationForm()
+        self.cap.release()
+        cv2.destroyAllWindows()
+        self.hide()
+        self.login_window.show()
+
+
+class TimeViewer(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Аутентификация')
+        self.resize(600, 400)
+        screen_size = QDesktopWidget().screenGeometry()
+        x = (screen_size.width() - self.width()) / 2
+        y = (screen_size.height() - self.height()) / 2
+        self.move(int(x), int(y))
+
+        self.label_username = QLabel('В этом месяце вы отработали 12 часов !')
+        self.label_username.setAlignment(Qt.AlignCenter)
+        self.back_button = QPushButton('Вернуться в главное меню')
+        self.back_button.clicked.connect(self.back_to_menu)
+
+        layout = QVBoxLayout()
+
+        layout.addWidget(self.label_username)
+        layout.addWidget(self.back_button)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 20px;
+            }
+            QLineEdit {
+                font-size: 16px;
+                padding: 6px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+            QPushButton {
+                font-size: 16px;
+                padding: 8px;
+                background-color: #4CAF50;
+                color: #fff;
+                border: none;
+                border-radius: 4px;
+            }
+            QMainWindow {
+                background-color: #f0f0f0;
+            }
+        """)
+
+    def back_to_menu(self):
         self.login_window = FaceAuthenticationForm()
         self.hide()
         self.login_window.show()
