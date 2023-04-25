@@ -7,7 +7,7 @@ from postgresdb import PostgreSQL
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
-    QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox, QDesktopWidget)
+    QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox)
 
 os.environ["QT_QPA_PLATFORM"] = "wayland"
 FACE_CASCADE = cv2.CascadeClassifier(
