@@ -32,7 +32,7 @@ class PostgreSQL:
             LOG.debug('Connection closed')
 
     def all_user_info(self, user_name):
-        """Получение данных о пользователе"""
+        """Получение данных о пользователе (Все)"""
 
         users_dict = {
             'name': '',
@@ -53,7 +53,7 @@ class PostgreSQL:
             return dict()
 
     def get_user_info(self, user_name):
-        """Получение данных о пользователе"""
+        """Получение данных о пользователе (Имя, права, время работы)"""
 
         users_dict = {
             'name': '',
@@ -70,8 +70,7 @@ class PostgreSQL:
                    f'Права: {result.get("rights", "")};\n' \
                    f'Время работы за месяц: {result.get("time", "")} ч.'
 
-        except Exception as e:
-            print(e)
+        except Exception:
             return 'Нет такого пользователя'
 
     def _new_table(self):
@@ -92,8 +91,7 @@ class PostgreSQL:
     def _delete_table(self):
         with self.connection.cursor() as cursor:
             cursor.execute(
-                '''DROP TABLE users_data;'''
-            )
+                '''DROP TABLE users_data;''')
 
             LOG.debug('Database deleted')
 
