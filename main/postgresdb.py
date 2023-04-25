@@ -59,6 +59,7 @@ class PostgreSQL:
             'name': '',
             'rights': '',
             'time': ''}
+
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(
