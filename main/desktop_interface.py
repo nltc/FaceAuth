@@ -17,6 +17,8 @@ EYE_CASCADE = cv2.CascadeClassifier(
 
 
 class FaceAuthenticationForm(QMainWindow):
+    """Класс авторизации по логину и паролю"""
+
     def __init__(self):
         super().__init__()
 
@@ -35,7 +37,6 @@ class FaceAuthenticationForm(QMainWindow):
         self.button_login.clicked.connect(self.login)
 
         layout = QVBoxLayout()
-
         layout.addWidget(self.label_username)
         layout.addWidget(self.edit_username)
         layout.addWidget(self.label_password)
@@ -73,7 +74,7 @@ class FaceAuthenticationForm(QMainWindow):
         username = self.edit_username.text()
         password = self.edit_password.text()
         db = PostgreSQL(URL)
-        user_info = db.get_info(username)
+        user_info = db.all_user_info(username)
         login_and_pwd = (
             True
             if username == user_info.get('login', '') and password == user_info.get('password', '')
@@ -96,6 +97,8 @@ class FaceAuthenticationForm(QMainWindow):
 
 
 class VideoPlayer(QMainWindow):
+    """Класс авторизации по лицу"""
+
     def __init__(self, user_info):
         super().__init__()
         self.user_info = user_info
@@ -182,12 +185,18 @@ class VideoPlayer(QMainWindow):
                         face_distance = face_recognition.face_distance([user_face_encoding], face_encoding)
 
                         if face_distance[0] < 0.6 and self.user_info.get('rights', '') == 'User':
-                            self.time_viewer = TimeViewer()
+                            self.time_viewer_user = TimeViewerUser(self.user_info.get('time', ''))
                             self.hide()
-                            self.time_viewer.show()
+                            self.cap.release()
+                            cv2.destroyAllWindows()
+                            self.time_viewer_user.show()
 
                         elif face_distance[0] < 0.6 and self.user_info.get('rights', '') == 'Admin':
-                            pass
+                            self.time_viewer_admin = TimeViewerAdmin()
+                            self.hide()
+                            self.cap.release()
+                            cv2.destroyAllWindows()
+                            self.time_viewer_admin.show()
 
                         else:
                             QMessageBox.warning(self, "Авторизация", "Ошибка авторизации. Попробуйте еще раз")
@@ -204,24 +213,24 @@ class VideoPlayer(QMainWindow):
         self.login_window.show()
 
 
-class TimeViewer(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class TimeViewerUser(QMainWindow):
+    """Класс счетчика времени пользователя"""
 
+    def __init__(self, time):
+        super().__init__()
         self.setWindowTitle('Аутентификация')
         self.resize(600, 400)
         screen_size = QDesktopWidget().screenGeometry()
         x = (screen_size.width() - self.width()) / 2
         y = (screen_size.height() - self.height()) / 2
         self.move(int(x), int(y))
-
-        self.label_username = QLabel('В этом месяце вы отработали 12 часов !')
+        self.time = time
+        self.label_username = QLabel(f'В этом месяце вы отработали {self.time} часов !')
         self.label_username.setAlignment(Qt.AlignCenter)
         self.back_button = QPushButton('Вернуться в главное меню')
         self.back_button.clicked.connect(self.back_to_menu)
 
         layout = QVBoxLayout()
-
         layout.addWidget(self.label_username)
         layout.addWidget(self.back_button)
 
@@ -256,6 +265,70 @@ class TimeViewer(QMainWindow):
         self.login_window = FaceAuthenticationForm()
         self.hide()
         self.login_window.show()
+
+
+class TimeViewerAdmin(QMainWindow):
+    """Класс счетчика времени админа"""
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Аутентификация')
+        self.resize(600, 400)
+        screen_size = QDesktopWidget().screenGeometry()
+        x = (screen_size.width() - self.width()) / 2
+        y = (screen_size.height() - self.height()) / 2
+        self.move(int(x), int(y))
+        self.name_text = QLabel('Введите имя пользователя, чтобы узнать, сколько он отработал')
+        self.label_username = QLabel('Поле для ввода имени:')
+        self.edit_username = QLineEdit()
+        self.select_button = QPushButton('Показать')
+        self.select_button.clicked.connect(self.show_user_time)
+        self.back_button = QPushButton('Вернуться в главное меню')
+        self.back_button.clicked.connect(self.back_to_menu)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.name_text)
+        layout.addWidget(self.label_username)
+        layout.addWidget(self.edit_username)
+        layout.addWidget(self.select_button)
+        layout.addWidget(self.back_button)
+        self.widget = QWidget()
+        self.widget.setLayout(layout)
+        self.setCentralWidget(self.widget)
+
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 20px;
+            }
+            QLineEdit {
+                font-size: 16px;
+                padding: 6px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+            QPushButton {
+                font-size: 16px;
+                padding: 8px;
+                background-color: #4CAF50;
+                color: #fff;
+                border: none;
+                border-radius: 4px;
+            }
+            QMainWindow {
+                background-color: #f0f0f0;
+            }
+        """)
+
+    def back_to_menu(self):
+        self.login_window = FaceAuthenticationForm()
+        self.hide()
+        self.login_window.show()
+
+    def show_user_time(self):
+        username = self.edit_username.text()
+        db = PostgreSQL(URL)
+        user_info = db.get_user_info(username)
+        self.name_text.setText(user_info)
 
 
 if __name__ == '__main__':

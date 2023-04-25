@@ -6,6 +6,8 @@ LOG = logging.getLogger(__name__)
 
 
 class PostgreSQL:
+    """Класс для подключение к PostgreSQL"""
+
     def __init__(self, url):
         try:
             self.connection = psycopg2.connect(url)
@@ -23,16 +25,21 @@ class PostgreSQL:
             LOG.error(exc)
 
     def close_connection(self):
+        """Закрытие подключения к базе данных"""
+
         if self.connection:
             self.connection.close()
             LOG.debug('Connection closed')
 
-    def get_info(self, user_name):
+    def all_user_info(self, user_name):
+        """Получение данных о пользователе"""
+
         users_dict = {
             'name': '',
             'rights': '',
             'login': '',
             'password': '',
+            'time': '',
             'path': ''}
 
         try:
@@ -41,8 +48,31 @@ class PostgreSQL:
                     f"SELECT * FROM users_data WHERE user_login = '{user_name}';")
 
                 return dict(zip(users_dict, cursor.fetchone()[1:]))
+
         except Exception:
             return dict()
+
+    def get_user_info(self, user_name):
+        """Получение данных о пользователе"""
+
+        users_dict = {
+            'name': '',
+            'rights': '',
+            'time': ''}
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(
+                    f"SELECT user_name, user_rights, work_time FROM users_data WHERE user_name = '{user_name}';")
+
+                result = dict(zip(users_dict, cursor.fetchone()))
+
+            return f'Имя: {result.get("name", "")};\n' \
+                   f'Права: {result.get("rights", "")};\n' \
+                   f'Время работы за месяц: {result.get("time", "")} ч.'
+
+        except Exception as e:
+            print(e)
+            return 'Нет такого пользователя'
 
     def _new_table(self):
         with self.connection.cursor() as cursor:
@@ -53,6 +83,7 @@ class PostgreSQL:
                     user_rights varchar(50),
                     user_login varchar(50),
                     user_password varchar(50),
+                    work_time varchar(50),
                     path_to_photo varchar(100))'''
             )
 
@@ -66,20 +97,17 @@ class PostgreSQL:
 
             LOG.debug('Database deleted')
 
-    def _insert_info(self, user_name, user_rights, user_login, user_passwd, path_to_photo):
+    def _insert_info(self, user_name, user_rights, user_login, user_passwd, work_time, path_to_photo):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f'''INSERT INTO users_data (
-                user_name, user_rights, user_login, user_password, path_to_photo) VALUES (
+                user_name, user_rights, user_login, user_password, work_time, path_to_photo) VALUES (
                 '{user_name}', '{user_rights}', '{user_login}',
-                '{user_passwd}','{path_to_photo}')'''
+                '{user_passwd}','{work_time}', '{path_to_photo}')'''
             )
         LOG.debug('info inserted')
 
 
 if __name__ == '__main__':
     db = PostgreSQL(URL)
-    print(db.get_info('nlt'))
-    # db._delete_table()
-    # db._new_table()
     db.close_connection()
