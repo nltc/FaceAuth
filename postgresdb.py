@@ -1,7 +1,7 @@
 import psycopg2
 import logging
 from config import URL
-
+from hashing import hash_password
 LOG = logging.getLogger(__name__)
 
 
@@ -84,7 +84,7 @@ class PostgreSQL:
                     user_name varchar(50),
                     user_rights varchar(50),
                     user_login varchar(50),
-                    user_password varchar(50),
+                    user_password varchar(100),
                     work_time varchar(50),
                     path_to_photo varchar(100))'''
             )

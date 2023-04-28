@@ -3,6 +3,7 @@ import os
 import face_recognition
 import cv2
 from config import URL
+from hashing import check_password
 from postgresdb import PostgreSQL
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer, Qt
@@ -31,6 +32,7 @@ class FaceAuthenticationForm(QMainWindow):
         self.edit_password = QLineEdit()
         self.button_login = QPushButton('Login')
         self.button_login.clicked.connect(self.login)
+        self.edit_password.setEchoMode(QLineEdit.Password)
 
         layout = QVBoxLayout()
         layout.addWidget(self.label_username)
@@ -74,11 +76,11 @@ class FaceAuthenticationForm(QMainWindow):
         user_info = db.all_user_info(username)
         login_and_pwd = (
             True
-            if username == user_info.get('login', '') and password == user_info.get('password', '')
+            if username == user_info.get('login', '') and check_password(password, user_info.get('password', ''))
             else False)
         login_and_not_pwd = (
             True
-            if username == user_info.get('login', '') and password != user_info.get('password', '')
+            if username == user_info.get('login', '') and not check_password(password, user_info.get('password', ''))
             else False)
 
         if login_and_pwd:
