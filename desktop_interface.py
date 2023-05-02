@@ -13,11 +13,16 @@ from PyQt5.QtWidgets import (
 os.environ["QT_QPA_PLATFORM"] = "wayland"
 
 if hasattr(sys, '_MEIPASS'):
-    FACE_CASCADE = cv2.CascadeClassifier(os.path.join(sys._MEIPASS, 'cascades/haarcascade_frontalface_default.xml'))
-    print(FACE_CASCADE)
-    EYE_CASCADE = cv2.CascadeClassifier(os.path.join(sys._MEIPASS, 'cascades/haarcascade_eye.xml'))
+    """Если запускатеся из скомпилированного файла"""
+
+    FACE_CASCADE = cv2.CascadeClassifier(
+        os.path.join(sys._MEIPASS, 'cascades/haarcascade_frontalface_default.xml'))
+    EYE_CASCADE = cv2.CascadeClassifier(
+        os.path.join(sys._MEIPASS, 'cascades/haarcascade_eye.xml'))
 
 else:
+    """Если запускатеся из IDE"""
+
     FACE_CASCADE = cv2.CascadeClassifier(
         os.path.abspath('cascades/haarcascade_frontalface_default.xml'))
     EYE_CASCADE = cv2.CascadeClassifier(
@@ -186,9 +191,13 @@ class VideoPlayer(QMainWindow):
 
             if len(face_locations) > 0:
                 if hasattr(sys, '_MEIPASS'):
+                    """Если запускатеся из скомпилированного файла"""
+
                     user_image = face_recognition.load_image_file(os.path.join(sys._MEIPASS, self.user_info.get('path')))
 
                 else:
+                    """Если запускается из IDE"""
+
                     user_image = face_recognition.load_image_file(self.user_info.get('path'))
 
                 user_face_encodings = face_recognition.face_encodings(user_image)
