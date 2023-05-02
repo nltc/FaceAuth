@@ -116,8 +116,4 @@ class PostgreSQL:
 
 if __name__ == '__main__':
     db = PostgreSQL(URL)
-    db._delete_table()
-    db._new_table()
-    db._insert_info('Владимир Мякотин', 'Admin', 'nlt', hash_password('Notlikethiscrush444'), '32', 'user_faces/VladimirMyakotin.png')
-    db._insert_info('Анна Овсянникова', 'User', 'annet', hash_password('skamskill'), '16', 'user_faces/Anya')
     db.close_connection()
