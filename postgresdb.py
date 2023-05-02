@@ -42,11 +42,11 @@ class PostgreSQL:
             'time': '',
             'path': ''}
 
+        sql = 'SELECT * FROM users_data WHERE user_login = %s;'
+
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute(
-                    f"SELECT * FROM users_data WHERE user_login = '{user_name}';")
-
+                cursor.execute(sql, (user_name,))
                 return dict(zip(users_dict, cursor.fetchone()[1:]))
 
         except Exception:
@@ -116,4 +116,8 @@ class PostgreSQL:
 
 if __name__ == '__main__':
     db = PostgreSQL(URL)
+    db._delete_table()
+    db._new_table()
+    db._insert_info('Владимир Мякотин', 'Admin', 'nlt', hash_password('Notlikethiscrush444'), '32', 'user_faces/VladimirMyakotin.png')
+    db._insert_info('Анна Овсянникова', 'User', 'annet', hash_password('skamskill'), '16', 'user_faces/Anya')
     db.close_connection()
