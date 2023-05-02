@@ -11,10 +11,17 @@ from PyQt5.QtWidgets import (
     QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox)
 
 os.environ["QT_QPA_PLATFORM"] = "wayland"
-FACE_CASCADE = cv2.CascadeClassifier(
-    'cascades/haarcascade_frontalface_default.xml')
-EYE_CASCADE = cv2.CascadeClassifier(
-    'cascades/haarcascade_eye.xml')
+
+if hasattr(sys, '_MEIPASS'):
+    FACE_CASCADE = cv2.CascadeClassifier(os.path.join(sys._MEIPASS, 'cascades/haarcascade_frontalface_default.xml'))
+    print(FACE_CASCADE)
+    EYE_CASCADE = cv2.CascadeClassifier(os.path.join(sys._MEIPASS, 'cascades/haarcascade_eye.xml'))
+
+else:
+    FACE_CASCADE = cv2.CascadeClassifier(
+        os.path.abspath('cascades/haarcascade_frontalface_default.xml'))
+    EYE_CASCADE = cv2.CascadeClassifier(
+        os.path.abspath('cascades/haarcascade_eye.xml'))
 
 
 class FaceAuthenticationForm(QMainWindow):
@@ -178,7 +185,12 @@ class VideoPlayer(QMainWindow):
             face_locations = face_recognition.face_locations(frame)
 
             if len(face_locations) > 0:
-                user_image = face_recognition.load_image_file(self.user_info.get('path'))
+                if hasattr(sys, '_MEIPASS'):
+                    user_image = face_recognition.load_image_file(os.path.join(sys._MEIPASS, self.user_info.get('path')))
+
+                else:
+                    user_image = face_recognition.load_image_file(self.user_info.get('path'))
+
                 user_face_encodings = face_recognition.face_encodings(user_image)
 
                 if len(user_face_encodings) > 0:
