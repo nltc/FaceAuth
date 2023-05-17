@@ -2,7 +2,7 @@ import sys
 import os
 import face_recognition
 import cv2
-from config import URL
+from config import HOST, USER, PASSWORD, DATABASE
 from hashing import check_password
 from postgresdb import PostgreSQL
 from PyQt5.QtGui import QImage, QPixmap
@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QApplication, QLabel, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, QMessageBox)
 
 os.environ["QT_QPA_PLATFORM"] = "wayland"
+os.environ["XDG_SESSION_TYPE"] = "x11"
 
 if hasattr(sys, '_MEIPASS'):
     """Если запускатеся из скомпилированного файла"""
@@ -84,7 +85,7 @@ class FaceAuthenticationForm(QMainWindow):
 
         username = self.edit_username.text()
         password = self.edit_password.text()
-        db = PostgreSQL(URL)
+        db = PostgreSQL(HOST, USER, PASSWORD, DATABASE)
         user_info = db.all_user_info(username)
         login_and_pwd = (
             True
@@ -193,7 +194,8 @@ class VideoPlayer(QMainWindow):
                 if hasattr(sys, '_MEIPASS'):
                     """Если запускатеся из скомпилированного файла"""
 
-                    user_image = face_recognition.load_image_file(os.path.join(sys._MEIPASS, self.user_info.get('path')))
+                    user_image = face_recognition.load_image_file(
+                        os.path.join(sys._MEIPASS, self.user_info.get('path')))
 
                 else:
                     """Если запускается из IDE"""
@@ -356,7 +358,7 @@ class TimeViewerAdmin(QMainWindow):
         """Показ информации о пользователях"""
 
         username = self.edit_username.text()
-        db = PostgreSQL(URL)
+        db = PostgreSQL(HOST, USER, PASSWORD, DATABASE)
         user_info = db.get_user_info(username)
         self.name_text.setText(user_info)
 

@@ -1,18 +1,23 @@
 import psycopg2
 import logging
-from config import URL
+from config import HOST, USER, PASSWORD, DATABASE
 from hashing import hash_password
+
 LOG = logging.getLogger(__name__)
 
 
 class PostgreSQL:
     """Класс для подключение к PostgreSQL"""
 
-    def __init__(self, url):
+    def __init__(self, host, user, password, database):
         try:
-            self.connection = psycopg2.connect(url)
+            self.connection = psycopg2.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database
+            )
             self.connection.autocommit = True
-
             with self.connection.cursor() as cursor:
                 cursor.execute(
                     "SELECT version();"
@@ -115,5 +120,5 @@ class PostgreSQL:
 
 
 if __name__ == '__main__':
-    db = PostgreSQL(URL)
+    db = PostgreSQL(HOST, USER, PASSWORD, DATABASE)
     db.close_connection()
